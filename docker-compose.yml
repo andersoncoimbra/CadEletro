@@ -10,4 +10,14 @@ services:
       volumes:
         - ./front:/app
       command: 'npm run dev'
+  back:
+      container_name: back
+      build:
+        context: .dockerfiles
+        dockerfile: DockerfileBackend
+      ports:
+        - 8888:8888
+      volumes:
+        - ./back:/app
+      command: 'php -S 0.0.0.0:8888 public/index.php'
       
