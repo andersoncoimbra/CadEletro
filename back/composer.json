@@ -48,7 +48,7 @@
         ],
         "startup": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan migrate --seed",
+            "@php artisan migrate --force --seed",
             "@php -S 0.0.0.0:8888 public/index.php"
         ]
     },
