@@ -10,6 +10,8 @@ services:
       volumes:
         - ./front:/app
       command: 'npm run dev'
+      depends_on:
+        - back
   back:
       container_name: back
       build:
@@ -19,5 +21,25 @@ services:
         - 8888:8888
       volumes:
         - ./back:/app
-      command: 'php -S 0.0.0.0:8888 public/index.php'
-      
+      command: 'composer startup'
+      depends_on:
+        - banco
+      networks:
+        - cadeletro
+  banco:
+      image: mysql:5.7
+      container_name: banco
+      ports:
+        - '3306:3306'
+      volumes:
+        - ./banco:/var/lib/mysql
+      environment:
+        - MYSQL_DATABASE=cadeletro
+        - MYSQL_ROOT_PASSWORD=cadeletro
+        - MYSQL_USER=cadeletro
+        - MYSQL_PASSWORD=cadeletro
+      networks:
+        - cadeletro
+networks:
+  cadeletro:
+    driver: bridge
