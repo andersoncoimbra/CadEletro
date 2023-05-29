@@ -2,13 +2,14 @@
   <div>
     <h1>Eletrodomésticos</h1>
     <div class="form">
-      <input v-model="novoEletrodomestico.name" placeholder="Nome">
-      <select v-model="novoEletrodomestico.marca">
-        <option v-for="marca in marcas" :key="marca.id" :value="marca.nome">
-          {{ marca }}
+      <input v-model="novoEletrodomestico.nome" placeholder="Nome" required>
+      <select v-model="novoEletrodomestico.marca_id" required>
+        <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
+          {{ marca.nome }}
         </option>
       </select>
-      <input v-model="novoEletrodomestico.price" placeholder="Preço">
+      <input v-model="novoEletrodomestico.tensao" placeholder="Tensão" required>
+      <input v-model="novoEletrodomestico.descricao" placeholder="Descrição" required>
       <button @click="addEletrodomestico">Adicionar</button>
     </div>
     <table>
@@ -16,14 +17,16 @@
         <tr>
           <th>Nome</th>
           <th>Marca</th>
+          <th>Tensão</th>
           <th>Descrição</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="eletrodomestico in eletrodomesticos" :key="eletrodomestico.id">
+        <tr v-for="eletrodomestico in eletrodomesticos" :key="eletrodomestico.id" placeholder="Marca">
           <td>{{ eletrodomestico.nome }}</td>
           <td>{{ getMarcaName(eletrodomestico.marca_id) }}</td>
+          <td>{{ eletrodomestico.tensao }}</td>
           <td>{{ eletrodomestico.descricao }}</td>
           <td>
             <button @click="editEletrodomestico(eletrodomestico)">Editar</button>
@@ -35,13 +38,14 @@
     <div v-if="editandoEletrodometico">
       <h2>Editar Eletrodoméstico</h2>
       <div class="form">
-        <input v-model="editandoEletrodometico.name" placeholder="Nome">
-        <select v-model="editandoEletrodometico.marca">
-          <option v-for="marca in marcas" :key="marca" :value="marca">
-            {{ marca }}
+        <input v-model="editandoEletrodometico.nome" placeholder="Nome">
+        <select v-model="editandoEletrodometico.marca_id">
+          <option v-for="marca in marcas" :key="marca.id" :value="marca.id">
+            {{ marca.nome }}
           </option>
         </select>
-        <input v-model="editandoEletrodometico.price" placeholder="Preço">
+        <input v-model="editandoEletrodometico.tensao">
+        <input v-model="editandoEletrodometico.descricao" >
         <button @click="saveEdits">Salvar</button>
         <button @click="cancelEdit">Cancelar</button>
       </div>
@@ -58,11 +62,12 @@ export default {
       eletrodomesticos: [],
       novoEletrodomestico: {
         name: '',
-        marca: '',
-        price: '',
+        marca_id: '',
+        descricao: '',
       },
       editandoEletrodometico: null,
       marcas: [],
+      errors: []
     };
   },
   created() {
@@ -75,7 +80,8 @@ export default {
         const response = await axios.get('/eletrodomesticos');
         this.eletrodomesticos = response.data;
       } catch (error) {
-        console.error(error);
+        
+        
       }
     },
     async addEletrodomestico() {
@@ -84,7 +90,18 @@ export default {
         this.eletrodomesticos.push(response.data);
         this.clearnovoEletrodomestico();
       } catch (error) {
-        console.error(error);
+        if (error.response && error.response.data && error.response.data.error) {
+          this.errors = error.response.data.error;
+          let msg = '';
+          Object.values(this.errors).forEach((value) => {
+            msg += value + '\n';
+          });
+          alert(msg);
+
+        } else {
+          // Exibir um erro genérico
+          console.error('Ocorreu um erro ao adicionar o eletrodoméstico.');
+        }
       }
     },
     async deleteEletrodomestico(id) {
@@ -124,7 +141,10 @@ export default {
       }
     },
     getMarcaName(marcaId){
-      return this.marcas.find((marca) => marca.id === marcaId).nome;
+      if (this.marcas.length > 0) {
+        const marca = this.marcas.find((marca) => marca.id === marcaId);
+        return marca.nome;
+      }
     },
     cancelEdit() {
       this.editandoEletrodometico = null;
