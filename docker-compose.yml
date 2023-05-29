@@ -22,6 +22,7 @@ services:
       volumes:
         - ./back:/app
       command: 'composer startup'
+      restart: always
       depends_on:
         - banco
       networks:
