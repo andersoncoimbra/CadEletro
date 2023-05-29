@@ -25,3 +25,4 @@ Sistema de cadastro de eletrodomésticos
 3. Ative os containers via docker-compose
    ```shell
    docker compose up
+4. Acesse a url http://localhost:8080
