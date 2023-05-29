@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EletrodomesticoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::apiResource('eletrodomesticos', EletrodomesticoController::class);
+Route::get('marcas', [EletrodomesticoController::class, 'marcas']);
