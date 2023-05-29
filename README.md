@@ -1,10 +1,17 @@
 # CADELETRO
-Descrição curta do projeto.
+Sistema de cadastro de eletrodomésticos
+
+## Tecnologias
+- Laravel 10
+- PHP 8
+- MySQL 8
+- Docker
+- Node 18
+- Vue 3
 
 ## Requisitos
 
-- DOCKER COMPOSER
-
+- Docker Compose
 
 ## Instalação
 
@@ -12,6 +19,9 @@ Descrição curta do projeto.
 
    ```shell
    git clone https://github.com/andersoncoimbra/CadEletro
-2. Ative os containe via docker-compose
+2. Entre no diretorio do projeto CadEletro
+   ```shell
+   cd CadEletro
+3. Ative os containers via docker-compose
    ```shell
    docker compose up
