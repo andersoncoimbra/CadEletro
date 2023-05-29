@@ -3,7 +3,11 @@
     <h1>Eletrodomésticos</h1>
     <div class="form">
       <input v-model="novoEletrodomestico.name" placeholder="Nome">
-      <input v-model="novoEletrodomestico.marca" placeholder="Marca">
+      <select v-model="novoEletrodomestico.marca">
+        <option v-for="marca in marcas" :key="marca.id" :value="marca.nome">
+          {{ marca }}
+        </option>
+      </select>
       <input v-model="novoEletrodomestico.price" placeholder="Preço">
       <button @click="addEletrodomestico">Adicionar</button>
     </div>
@@ -12,15 +16,15 @@
         <tr>
           <th>Nome</th>
           <th>Marca</th>
-          <th>Preço</th>
+          <th>Descrição</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="eletrodomestico in eletrodomesticos" :key="eletrodomestico.id">
-          <td>{{ eletrodomestico.name }}</td>
-          <td>{{ eletrodomestico.marca }}</td>
-          <td>{{ eletrodomestico.price }}</td>
+          <td>{{ eletrodomestico.nome }}</td>
+          <td>{{ getMarcaName(eletrodomestico.marca_id) }}</td>
+          <td>{{ eletrodomestico.descricao }}</td>
           <td>
             <button @click="editEletrodomestico(eletrodomestico)">Editar</button>
             <button @click="deleteEletrodomestico(eletrodomestico.id)">Excluir</button>
@@ -36,7 +40,7 @@
           <option v-for="marca in marcas" :key="marca" :value="marca">
             {{ marca }}
           </option>
-        </select>        
+        </select>
         <input v-model="editandoEletrodometico.price" placeholder="Preço">
         <button @click="saveEdits">Salvar</button>
         <button @click="cancelEdit">Cancelar</button>
@@ -46,44 +50,81 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      eletrodomesticos: [
-        { id: 1, name: 'Geladeira', marca: 'Brastemp', price: 1999.99 },
-        { id: 2, name: 'Fogão', marca: 'Electrolux', price: 1299.99 },
-        { id: 3, name: 'Máquina de Lavar', marca: 'Consul', price: 1599.99 },
-        { id: 4, name: 'TV', marca: 'Samsung', price: 2499.99 },
-      ],
+      eletrodomesticos: [],
       novoEletrodomestico: {
         name: '',
         marca: '',
         price: '',
       },
       editandoEletrodometico: null,
-      marcas: ['Brastemp', 'Electrolux', 'Fischer', 'Samsung', 'LG'],
+      marcas: [],
     };
   },
+  created() {
+    this.fetchMarcas();
+    this.fetchEletrodomesticos();
+  },
   methods: {
-    addEletrodomestico() {
-      const id = this.eletrodomesticos.length + 1;
-      this.eletrodomesticos.push({ ...this.novoEletrodomestico, id });
-      this.clearnovoEletrodomestico();
+    async fetchEletrodomesticos() {
+      try {
+        const response = await axios.get('/eletrodomesticos');
+        this.eletrodomesticos = response.data;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    deleteEletrodomestico(id) {
-      this.eletrodomesticos = this.eletrodomesticos.filter(
-        (eletrodomestico) => eletrodomestico.id !== id
-      );
+    async addEletrodomestico() {
+      try {
+        const response = await axios.post('/eletrodomesticos', this.novoEletrodomestico);
+        this.eletrodomesticos.push(response.data);
+        this.clearnovoEletrodomestico();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async deleteEletrodomestico(id) {
+      try {
+        await axios.delete(`/eletrodomesticos/${id}`);
+        this.eletrodomesticos = this.eletrodomesticos.filter(
+          (eletrodomestico) => eletrodomestico.id !== id
+        );
+      } catch (error) {
+        console.error(error);
+      }
     },
     editEletrodomestico(eletrodomestico) {
       this.editandoEletrodometico = { ...eletrodomestico };
     },
-    saveEdits() {
-      const index = this.eletrodomesticos.findIndex(
-        (eletrodomestico) => eletrodomestico.id === this.editandoEletrodometico.id
-      );
-      this.eletrodomesticos.splice(index, 1, this.editandoEletrodometico);
-      this.cancelEdit();
+    async saveEdits() {
+      try {
+        const response = await axios.put(
+          `/eletrodomesticos/${this.editandoEletrodometico.id}`,
+          this.editandoEletrodometico
+        );
+        const index = this.eletrodomesticos.findIndex(
+          (eletrodomestico) => eletrodomestico.id === this.editandoEletrodometico.id
+        );
+        this.eletrodomesticos.splice(index, 1, response.data);
+        this.cancelEdit();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async fetchMarcas(){
+      try {
+        const response = await axios.get('/marcas');
+        this.marcas = response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    getMarcaName(marcaId){
+      return this.marcas.find((marca) => marca.id === marcaId).nome;
     },
     cancelEdit() {
       this.editandoEletrodometico = null;
